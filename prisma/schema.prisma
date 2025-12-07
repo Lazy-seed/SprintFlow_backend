@@ -1,0 +1,412 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  fullName        String    @map("full_name")
+  avatarUrl       String?   @map("avatar_url")
+  timezone        String    @default("UTC")
+  preferences     Json      @default("{}")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  // Relations
+  ownedWorkspaces   Workspace[]        @relation("WorkspaceOwner")
+  memberships       WorkspaceMember[]
+  createdTasks      Task[]             @relation("TaskReporter")
+  assignedTasks     Task[]             @relation("TaskAssignee")
+  taskAssignments   TaskAssignee[]
+  comments          Comment[]
+  activityLogs      ActivityLog[]
+  notifications     Notification[]
+  uploadedFiles     Attachment[]
+  boardMemberships  BoardMember[]
+  createdBoards     Board[]            @relation("BoardCreator")
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// ============================================
+// WORKSPACE & TEAMS
+// ============================================
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  ownerId     String   @map("owner_id")
+  planTier    String   @map("plan_tier") @default("free") // free, pro, business, enterprise
+  description String?
+  avatarUrl   String?  @map("avatar_url")
+  settings    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  owner        User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members      WorkspaceMember[]
+  boards       Board[]
+  tags         Tag[]
+  subscription StripeSubscription?
+
+  @@index([slug])
+  @@index([ownerId])
+  @@index([planTier])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  userId      String    @map("user_id")
+  role        String    @default("editor") // owner, admin, editor, viewer
+  invitedAt   DateTime  @default(now()) @map("invited_at")
+  joinedAt    DateTime? @map("joined_at")
+  invitedBy   String?   @map("invited_by")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+// ============================================
+// BOARDS & COLUMNS
+// ============================================
+
+model Board {
+  id              String    @id @default(uuid())
+  workspaceId     String    @map("workspace_id")
+  name            String
+  description     String?
+  isPrivate       Boolean   @default(false) @map("is_private")
+  isTemplate      Boolean   @default(false) @map("is_template")
+  backgroundColor String    @default("#ffffff") @map("background_color")
+  position        Int
+  createdBy       String    @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  archivedAt      DateTime? @map("archived_at")
+
+  // Relations
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  creator   User          @relation("BoardCreator", fields: [createdBy], references: [id])
+  columns   BoardColumn[]
+  tasks     Task[]
+  members   BoardMember[]
+
+  @@index([workspaceId])
+  @@index([position])
+  @@index([archivedAt])
+  @@map("boards")
+}
+
+model BoardColumn {
+  id        String   @id @default(uuid())
+  boardId   String   @map("board_id")
+  name      String
+  position  Int
+  color     String   @default("#6b7280")
+  wipLimit  Int?     @map("wip_limit")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([boardId, position])
+  @@index([boardId])
+  @@map("board_columns")
+}
+
+model BoardMember {
+  id      String   @id @default(uuid())
+  boardId String   @map("board_id")
+  userId  String   @map("user_id")
+  role    String   @default("viewer") // editor, viewer, guest
+  addedAt DateTime @default(now()) @map("added_at")
+
+  // Relations
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+  @@index([userId])
+  @@map("board_members")
+}
+
+// ============================================
+// TASKS
+// ============================================
+
+model Task {
+  id             String    @id @default(uuid())
+  boardId        String    @map("board_id")
+  columnId       String    @map("column_id")
+  title          String
+  description    String?   @db.Text
+  priority       String    @default("medium") // low, medium, high, critical
+  taskNumber     String    @unique @map("task_number")
+  dueDate        DateTime? @map("due_date") @db.Date
+  startDate      DateTime? @map("start_date") @db.Date
+  assigneeId     String?   @map("assignee_id") // Deprecated for Pro+, use TaskAssignee
+  reporterId     String    @map("reporter_id")
+  position       Int
+  estimatedHours Int?      @map("estimated_hours")
+  actualHours    Int?      @map("actual_hours")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  completedAt    DateTime? @map("completed_at")
+
+  // Relations
+  board        Board              @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column       BoardColumn        @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  assignee     User?              @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  reporter     User               @relation("TaskReporter", fields: [reporterId], references: [id])
+  subtasks     Subtask[]
+  tags         TaskTag[]
+  comments     Comment[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
+  dependencies TaskDependency[]   @relation("DependentTask")
+  blockedBy    TaskDependency[]   @relation("BlockingTask")
+  assignees    TaskAssignee[]
+
+  @@index([boardId])
+  @@index([columnId])
+  @@index([assigneeId])
+  @@index([reporterId])
+  @@index([taskNumber])
+  @@index([dueDate])
+  @@index([columnId, position])
+  @@map("tasks")
+}
+
+model Subtask {
+  id           String    @id @default(uuid())
+  parentTaskId String    @map("parent_task_id")
+  title        String
+  isCompleted  Boolean   @default(false) @map("is_completed")
+  position     Int
+  createdAt    DateTime  @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
+
+  // Relations
+  parentTask Task @relation(fields: [parentTaskId], references: [id], onDelete: Cascade)
+
+  @@index([parentTaskId])
+  @@index([parentTaskId, position])
+  @@map("subtasks")
+}
+
+model TaskDependency {
+  id              String   @id @default(uuid())
+  taskId          String   @map("task_id")
+  dependsOnTaskId String   @map("depends_on_task_id")
+  dependencyType  String   @default("blocks") @map("dependency_type") // blocks, blocked_by
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  task          Task @relation("DependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask Task @relation("BlockingTask", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+  @@index([taskId])
+  @@index([dependsOnTaskId])
+  @@map("task_dependencies")
+}
+
+model TaskAssignee {
+  id         String   @id @default(uuid())
+  taskId     String   @map("task_id")
+  userId     String   @map("user_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_assignees")
+}
+
+// ============================================
+// TAGS
+// ============================================
+
+model Tag {
+  id          String   @id @default(uuid())
+  workspaceId String   @map("workspace_id")
+  name        String
+  color       String   @default("#6b7280")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks     TaskTag[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("tags")
+}
+
+model TaskTag {
+  id        String   @id @default(uuid())
+  taskId    String   @map("task_id")
+  tagId     String   @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, tagId])
+  @@index([taskId])
+  @@index([tagId])
+  @@map("task_tags")
+}
+
+// ============================================
+// COMMENTS & ACTIVITY
+// ============================================
+
+model Comment {
+  id        String    @id @default(uuid())
+  taskId    String    @map("task_id")
+  userId    String    @map("user_id")
+  content   String    @db.Text
+  mentions  Json      @default("[]")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  taskId      String   @map("task_id")
+  userId      String   @map("user_id")
+  actionType  String   @map("action_type")
+  oldValue    Json?    @map("old_value")
+  newValue    Json?    @map("new_value")
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([actionType])
+  @@map("activity_logs")
+}
+
+// ============================================
+// ATTACHMENTS
+// ============================================
+
+model Attachment {
+  id                 String   @id @default(uuid())
+  taskId             String   @map("task_id")
+  uploadedBy         String   @map("uploaded_by")
+  fileName           String   @map("file_name")
+  fileUrl            String   @map("file_url")
+  fileType           String   @map("file_type")
+  fileSize           Int      @map("file_size")
+  cloudinaryPublicId String   @map("cloudinary_public_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  // Relations
+  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader User @relation(fields: [uploadedBy], references: [id])
+
+  @@index([taskId])
+  @@index([uploadedBy])
+  @@map("attachments")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id       String    @id @default(uuid())
+  userId   String    @map("user_id")
+  type     String
+  title    String
+  message  String    @db.Text
+  metadata Json      @default("{}")
+  isRead   Boolean   @default(false) @map("is_read")
+  readAt   DateTime? @map("read_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ============================================
+// BILLING
+// ============================================
+
+model StripeSubscription {
+  id                   String    @id @default(uuid())
+  workspaceId          String    @unique @map("workspace_id")
+  stripeCustomerId     String    @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  planTier             String    @map("plan_tier")
+  status               String // active, canceled, past_due, etc.
+  currentPeriodStart   DateTime? @map("current_period_start")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  canceledAt           DateTime? @map("canceled_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([stripeCustomerId])
+  @@index([status])
+  @@map("stripe_subscriptions")
+}
