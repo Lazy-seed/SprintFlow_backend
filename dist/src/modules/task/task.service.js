@@ -76,6 +76,64 @@ let TaskService = class TaskService {
         });
         return task;
     }
+    async findOne(id, userId) {
+        const task = await this.prisma.task.findFirst({
+            where: {
+                id,
+                board: {
+                    workspace: {
+                        members: {
+                            some: {
+                                userId: userId
+                            },
+                        },
+                    },
+                },
+            },
+            include: {
+                assignee: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        avatarUrl: true,
+                    },
+                },
+                reporter: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        avatarUrl: true,
+                    },
+                },
+                subtasks: {
+                    orderBy: { position: 'asc' },
+                },
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                avatarUrl: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                },
+                _count: {
+                    select: {
+                        subtasks: true,
+                        comments: true,
+                    },
+                },
+            },
+        });
+        if (!task) {
+            throw new common_1.NotFoundException('Task not found');
+        }
+        return task;
+    }
     async update(id, userId, updateTaskDto) {
         const task = await this.prisma.task.findFirst({
             where: {
@@ -108,6 +166,28 @@ let TaskService = class TaskService {
                         id: true,
                         fullName: true,
                         avatarUrl: true,
+                    },
+                },
+                subtasks: {
+                    orderBy: { position: 'asc' },
+                },
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                avatarUrl: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                },
+                _count: {
+                    select: {
+                        subtasks: true,
+                        comments: true,
                     },
                 },
             },

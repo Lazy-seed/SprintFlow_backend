@@ -58,6 +58,18 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         return this.prisma.comment;
     }
 
+    get subtask() {
+        return this.prisma.subtask;
+    }
+
+    get boardColumn() {
+        return this.prisma.boardColumn;
+    }
+
+    get workspaceMember() {
+        return this.prisma.workspaceMember;
+    }
+
     // Add other models as needed
     get $transaction() {
         return this.prisma.$transaction.bind(this.prisma);

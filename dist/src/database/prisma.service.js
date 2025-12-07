@@ -51,6 +51,15 @@ let PrismaService = class PrismaService {
     get comment() {
         return this.prisma.comment;
     }
+    get subtask() {
+        return this.prisma.subtask;
+    }
+    get boardColumn() {
+        return this.prisma.boardColumn;
+    }
+    get workspaceMember() {
+        return this.prisma.workspaceMember;
+    }
     get $transaction() {
         return this.prisma.$transaction.bind(this.prisma);
     }

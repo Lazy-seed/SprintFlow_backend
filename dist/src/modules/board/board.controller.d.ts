@@ -1,5 +1,8 @@
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
+import { CreateColumnDto } from './dto/create-column.dto';
+import { UpdateColumnDto } from './dto/update-column.dto';
+import { ReorderColumnsDto } from './dto/reorder-columns.dto';
 export declare class BoardController {
     private readonly boardService;
     constructor(boardService: BoardService);
@@ -11,65 +14,69 @@ export declare class BoardController {
             avatarUrl: string | null;
         };
         columns: {
-            name: string;
             id: string;
+            name: string;
+            position: number;
             createdAt: Date;
             updatedAt: Date;
-            boardId: string;
-            position: number;
             color: string;
             wipLimit: number | null;
+            boardId: string;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
-        workspaceId: string;
-        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        createdBy: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
         archivedAt: Date | null;
+        workspaceId: string;
+        createdBy: string;
     }>;
     findAll(workspaceId: string, user: any): Promise<({
-        _count: {
-            columns: number;
-            tasks: number;
-        };
         creator: {
             id: string;
             fullName: string;
             avatarUrl: string | null;
         };
+        _count: {
+            columns: number;
+            tasks: number;
+        };
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
-        workspaceId: string;
-        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        createdBy: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
         archivedAt: Date | null;
+        workspaceId: string;
+        createdBy: string;
     })[]>;
     findOne(id: string, user: any): Promise<{
         workspace: {
-            name: string;
             id: string;
+            name: string;
             slug: string;
         };
         columns: ({
             tasks: ({
+                _count: {
+                    comments: number;
+                    subtasks: number;
+                };
                 tags: ({
                     tag: {
-                        name: string;
                         id: string;
+                        name: string;
                         createdAt: Date;
                         workspaceId: string;
                         color: string;
@@ -80,10 +87,6 @@ export declare class BoardController {
                     taskId: string;
                     tagId: string;
                 })[];
-                _count: {
-                    comments: number;
-                    subtasks: number;
-                };
                 assignee: {
                     id: string;
                     fullName: string;
@@ -91,10 +94,12 @@ export declare class BoardController {
                 } | null;
             } & {
                 id: string;
+                description: string | null;
+                position: number;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string | null;
                 boardId: string;
+                completedAt: Date | null;
                 columnId: string;
                 title: string;
                 priority: string;
@@ -103,36 +108,67 @@ export declare class BoardController {
                 startDate: Date | null;
                 assigneeId: string | null;
                 reporterId: string;
-                position: number;
                 estimatedHours: number | null;
                 actualHours: number | null;
-                completedAt: Date | null;
             })[];
         } & {
-            name: string;
             id: string;
+            name: string;
+            position: number;
             createdAt: Date;
             updatedAt: Date;
-            boardId: string;
-            position: number;
             color: string;
             wipLimit: number | null;
+            boardId: string;
         })[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
-        workspaceId: string;
-        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        createdBy: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
         archivedAt: Date | null;
+        workspaceId: string;
+        createdBy: string;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;
     }>;
+    createColumn(boardId: string, user: any, createColumnDto: CreateColumnDto): Promise<{
+        id: string;
+        name: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
+        color: string;
+        wipLimit: number | null;
+        boardId: string;
+    }>;
+    updateColumn(columnId: string, user: any, updateColumnDto: UpdateColumnDto): Promise<{
+        id: string;
+        name: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
+        color: string;
+        wipLimit: number | null;
+        boardId: string;
+    }>;
+    deleteColumn(columnId: string, user: any, targetColumnId?: string): Promise<{
+        message: string;
+    }>;
+    reorderColumns(boardId: string, user: any, reorderColumnsDto: ReorderColumnsDto): Promise<{
+        id: string;
+        name: string;
+        position: number;
+        createdAt: Date;
+        updatedAt: Date;
+        color: string;
+        wipLimit: number | null;
+        boardId: string;
+    }[]>;
 }

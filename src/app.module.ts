@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
 import { BoardModule } from './modules/board/board.module';
 import { TaskModule } from './modules/task/task.module';
+import { SubtaskModule } from './modules/subtask/subtask.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { TaskModule } from './modules/task/task.module';
     WorkspaceModule,
     BoardModule,
     TaskModule,
+    SubtaskModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

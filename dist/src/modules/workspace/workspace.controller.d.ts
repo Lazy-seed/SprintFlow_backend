@@ -19,47 +19,47 @@ export declare class WorkspaceController {
             };
         } & {
             id: string;
-            workspaceId: string;
-            userId: string;
             role: string;
             invitedAt: Date;
             joinedAt: Date | null;
             invitedBy: string | null;
+            userId: string;
+            workspaceId: string;
         })[];
     } & {
-        name: string;
         id: string;
         avatarUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         slug: string;
-        ownerId: string;
         planTier: string;
         description: string | null;
         settings: import("@prisma/client/runtime/client").JsonValue;
+        ownerId: string;
     }>;
     findAll(user: any): Promise<({
+        _count: {
+            members: number;
+            boards: number;
+        };
         owner: {
             id: string;
             email: string;
             fullName: string;
             avatarUrl: string | null;
         };
-        _count: {
-            members: number;
-            boards: number;
-        };
     } & {
-        name: string;
         id: string;
         avatarUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         slug: string;
-        ownerId: string;
         planTier: string;
         description: string | null;
         settings: import("@prisma/client/runtime/client").JsonValue;
+        ownerId: string;
     })[]>;
     findOne(id: string, user: any): Promise<{
         owner: {
@@ -77,38 +77,38 @@ export declare class WorkspaceController {
             };
         } & {
             id: string;
-            workspaceId: string;
-            userId: string;
             role: string;
             invitedAt: Date;
             joinedAt: Date | null;
             invitedBy: string | null;
+            userId: string;
+            workspaceId: string;
         })[];
         boards: {
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
-            workspaceId: string;
+            archivedAt: Date | null;
             position: number;
+            workspaceId: string;
             isPrivate: boolean;
             isTemplate: boolean;
             backgroundColor: string;
             createdBy: string;
-            archivedAt: Date | null;
         }[];
     } & {
-        name: string;
         id: string;
         avatarUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         slug: string;
-        ownerId: string;
         planTier: string;
         description: string | null;
         settings: import("@prisma/client/runtime/client").JsonValue;
+        ownerId: string;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;

@@ -16,6 +16,8 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const workspace_module_1 = require("./modules/workspace/workspace.module");
 const board_module_1 = require("./modules/board/board.module");
 const task_module_1 = require("./modules/task/task.module");
+const subtask_module_1 = require("./modules/subtask/subtask.module");
+const comment_module_1 = require("./modules/comment/comment.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,6 +32,8 @@ exports.AppModule = AppModule = __decorate([
             workspace_module_1.WorkspaceModule,
             board_module_1.BoardModule,
             task_module_1.TaskModule,
+            subtask_module_1.SubtaskModule,
+            comment_module_1.CommentModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

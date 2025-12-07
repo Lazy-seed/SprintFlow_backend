@@ -180,6 +180,152 @@ let BoardService = class BoardService {
         await this.prisma.board.delete({ where: { id } });
         return { message: 'Board deleted successfully' };
     }
+    async createColumn(boardId, userId, createColumnDto) {
+        const board = await this.prisma.board.findFirst({
+            where: {
+                id: boardId,
+                workspace: {
+                    members: {
+                        some: { userId },
+                    },
+                },
+            },
+        });
+        if (!board) {
+            throw new common_1.NotFoundException('Board not found');
+        }
+        const maxPosition = await this.prisma.boardColumn.findFirst({
+            where: { boardId },
+            orderBy: { position: 'desc' },
+            select: { position: true },
+        });
+        const position = (maxPosition?.position ?? -1) + 1;
+        const column = await this.prisma.boardColumn.create({
+            data: {
+                boardId,
+                name: createColumnDto.name,
+                color: createColumnDto.color ?? '#6b7280',
+                position,
+            },
+        });
+        return column;
+    }
+    async updateColumn(columnId, userId, updateColumnDto) {
+        const column = await this.prisma.boardColumn.findFirst({
+            where: {
+                id: columnId,
+                board: {
+                    workspace: {
+                        members: {
+                            some: { userId },
+                        },
+                    },
+                },
+            },
+        });
+        if (!column) {
+            throw new common_1.NotFoundException('Column not found');
+        }
+        const updatedColumn = await this.prisma.boardColumn.update({
+            where: { id: columnId },
+            data: updateColumnDto,
+        });
+        return updatedColumn;
+    }
+    async deleteColumn(columnId, userId, targetColumnId) {
+        const column = await this.prisma.boardColumn.findFirst({
+            where: {
+                id: columnId,
+                board: {
+                    workspace: {
+                        members: {
+                            some: { userId },
+                        },
+                    },
+                },
+            },
+            include: {
+                board: {
+                    include: {
+                        columns: true,
+                    },
+                },
+            },
+        });
+        if (!column) {
+            throw new common_1.NotFoundException('Column not found');
+        }
+        if (column.board.columns.length === 1) {
+            throw new common_1.BadRequestException('Cannot delete the last column. Board must have at least one column.');
+        }
+        let targetId = targetColumnId;
+        if (!targetId) {
+            const firstOtherColumn = column.board.columns.find(col => col.id !== columnId);
+            targetId = firstOtherColumn.id;
+        }
+        const targetColumn = column.board.columns.find(col => col.id === targetId);
+        if (!targetColumn) {
+            throw new common_1.BadRequestException('Target column not found or not on the same board');
+        }
+        await this.prisma.$transaction(async (tx) => {
+            await tx.task.updateMany({
+                where: { columnId },
+                data: { columnId: targetId },
+            });
+            await tx.boardColumn.delete({
+                where: { id: columnId },
+            });
+            const columnsToUpdate = column.board.columns
+                .filter(col => col.id !== columnId && col.position > column.position);
+            for (const col of columnsToUpdate) {
+                await tx.boardColumn.update({
+                    where: { id: col.id },
+                    data: { position: col.position - 1 },
+                });
+            }
+        });
+        return { message: 'Column deleted successfully' };
+    }
+    async reorderColumns(boardId, userId, reorderColumnsDto) {
+        const board = await this.prisma.board.findFirst({
+            where: {
+                id: boardId,
+                workspace: {
+                    members: {
+                        some: { userId },
+                    },
+                },
+            },
+            include: {
+                columns: true,
+            },
+        });
+        if (!board) {
+            throw new common_1.NotFoundException('Board not found');
+        }
+        const { columnIds } = reorderColumnsDto;
+        if (columnIds.length !== board.columns.length) {
+            throw new common_1.BadRequestException('Column IDs count does not match board columns count');
+        }
+        const boardColumnIds = board.columns.map(col => col.id);
+        const allIdsValid = columnIds.every(id => boardColumnIds.includes(id));
+        if (!allIdsValid) {
+            throw new common_1.BadRequestException('Some column IDs are invalid or do not belong to this board');
+        }
+        await this.prisma.$transaction(async (tx) => {
+            for (let i = 0; i < columnIds.length; i++) {
+                await tx.boardColumn.update({
+                    where: { id: columnIds[i] },
+                    data: { position: i },
+                });
+            }
+        });
+        const updatedColumns = await this.prisma.boardColumn.findMany({
+            where: { boardId },
+            orderBy: { position: 'asc' },
+        });
+        return updatedColumns;
+    }
 };
 exports.BoardService = BoardService;
 exports.BoardService = BoardService = __decorate([

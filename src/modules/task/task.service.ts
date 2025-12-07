@@ -77,6 +77,67 @@ export class TaskService {
         return task;
     }
 
+    async findOne(id: string, userId: string) {
+        const task = await this.prisma.task.findFirst({
+            where: {
+                id,
+                board: {
+                    workspace: {
+                        members: {
+                            some: {
+                                userId: userId
+                            },
+                        },
+                    },
+                },
+            },
+            include: {
+                assignee: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        avatarUrl: true,
+                    },
+                },
+                reporter: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        avatarUrl: true,
+                    },
+                },
+                subtasks: {
+                    orderBy: { position: 'asc' },
+                },
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                avatarUrl: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                },
+                _count: {
+                    select: {
+                        subtasks: true,
+                        comments: true,
+                    },
+                },
+            },
+        });
+
+        if (!task) {
+            throw new NotFoundException('Task not found');
+        }
+
+        return task;
+    }
+
     async update(id: string, userId: string, updateTaskDto: UpdateTaskDto) {
         const task = await this.prisma.task.findFirst({
             where: {
@@ -111,6 +172,28 @@ export class TaskService {
                         id: true,
                         fullName: true,
                         avatarUrl: true,
+                    },
+                },
+                subtasks: {
+                    orderBy: { position: 'asc' },
+                },
+                comments: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                avatarUrl: true,
+                            },
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                },
+                _count: {
+                    select: {
+                        subtasks: true,
+                        comments: true,
                     },
                 },
             },

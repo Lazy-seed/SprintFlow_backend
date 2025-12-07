@@ -24,11 +24,14 @@ let TaskController = class TaskController {
     constructor(taskService) {
         this.taskService = taskService;
     }
-    create(boardId, user, createTaskDto) {
-        return this.taskService.create(boardId, user.id, createTaskDto);
+    create(boardId, userId, createTaskDto) {
+        return this.taskService.create(boardId, userId, createTaskDto);
     }
-    update(id, user, updateTaskDto) {
-        return this.taskService.update(id, user.id, updateTaskDto);
+    findOne(id, userId) {
+        return this.taskService.findOne(id, userId);
+    }
+    update(id, userId, updateTaskDto) {
+        return this.taskService.update(id, userId, updateTaskDto);
     }
     remove(id, user) {
         return this.taskService.remove(id, user.id);
@@ -38,19 +41,27 @@ exports.TaskController = TaskController;
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Param)('boardId')),
-    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, create_task_dto_1.CreateTaskDto]),
+    __metadata("design:paramtypes", [String, String, create_task_dto_1.CreateTaskDto]),
     __metadata("design:returntype", void 0)
 ], TaskController.prototype, "create", null);
 __decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], TaskController.prototype, "findOne", null);
+__decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, update_task_dto_1.UpdateTaskDto]),
+    __metadata("design:paramtypes", [String, String, update_task_dto_1.UpdateTaskDto]),
     __metadata("design:returntype", void 0)
 ], TaskController.prototype, "update", null);
 __decorate([
