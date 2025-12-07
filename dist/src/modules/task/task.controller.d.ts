@@ -17,22 +17,22 @@ export declare class TaskController {
         };
     } & {
         id: string;
-        title: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        boardId: string;
+        columnId: string;
+        title: string;
         priority: string;
         taskNumber: string;
         dueDate: Date | null;
         startDate: Date | null;
+        assigneeId: string | null;
+        reporterId: string;
         position: number;
         estimatedHours: number | null;
         actualHours: number | null;
-        createdAt: Date;
-        updatedAt: Date;
         completedAt: Date | null;
-        boardId: string;
-        columnId: string;
-        assigneeId: string | null;
-        reporterId: string;
     }>;
     findOne(id: string, userId: string): Promise<{
         comments: ({
@@ -52,6 +52,10 @@ export declare class TaskController {
             content: string;
             mentions: import("@prisma/client/runtime/client").JsonValue;
         })[];
+        _count: {
+            comments: number;
+            subtasks: number;
+        };
         assignee: {
             id: string;
             fullName: string;
@@ -64,35 +68,31 @@ export declare class TaskController {
         };
         subtasks: {
             id: string;
+            createdAt: Date;
             title: string;
             position: number;
-            createdAt: Date;
             completedAt: Date | null;
             parentTaskId: string;
             isCompleted: boolean;
         }[];
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
     } & {
         id: string;
-        title: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        boardId: string;
+        columnId: string;
+        title: string;
         priority: string;
         taskNumber: string;
         dueDate: Date | null;
         startDate: Date | null;
+        assigneeId: string | null;
+        reporterId: string;
         position: number;
         estimatedHours: number | null;
         actualHours: number | null;
-        createdAt: Date;
-        updatedAt: Date;
         completedAt: Date | null;
-        boardId: string;
-        columnId: string;
-        assigneeId: string | null;
-        reporterId: string;
     }>;
     update(id: string, userId: string, updateTaskDto: UpdateTaskDto): Promise<{
         comments: ({
@@ -112,6 +112,10 @@ export declare class TaskController {
             content: string;
             mentions: import("@prisma/client/runtime/client").JsonValue;
         })[];
+        _count: {
+            comments: number;
+            subtasks: number;
+        };
         assignee: {
             id: string;
             fullName: string;
@@ -124,35 +128,31 @@ export declare class TaskController {
         };
         subtasks: {
             id: string;
+            createdAt: Date;
             title: string;
             position: number;
-            createdAt: Date;
             completedAt: Date | null;
             parentTaskId: string;
             isCompleted: boolean;
         }[];
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
     } & {
         id: string;
-        title: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        boardId: string;
+        columnId: string;
+        title: string;
         priority: string;
         taskNumber: string;
         dueDate: Date | null;
         startDate: Date | null;
+        assigneeId: string | null;
+        reporterId: string;
         position: number;
         estimatedHours: number | null;
         actualHours: number | null;
-        createdAt: Date;
-        updatedAt: Date;
         completedAt: Date | null;
-        boardId: string;
-        columnId: string;
-        assigneeId: string | null;
-        reporterId: string;
     }>;
     remove(id: string, user: any): Promise<{
         message: string;

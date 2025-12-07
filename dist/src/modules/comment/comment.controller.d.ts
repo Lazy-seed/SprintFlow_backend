@@ -13,13 +13,13 @@ export declare class CommentController {
         };
     } & {
         id: string;
-        content: string;
-        mentions: import("@prisma/client/runtime/client").JsonValue;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        taskId: string;
         userId: string;
+        taskId: string;
+        content: string;
+        mentions: import("@prisma/client/runtime/client").JsonValue;
     }>;
     findAll(taskId: string, userId: string): Promise<({
         user: {
@@ -30,13 +30,13 @@ export declare class CommentController {
         };
     } & {
         id: string;
-        content: string;
-        mentions: import("@prisma/client/runtime/client").JsonValue;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        taskId: string;
         userId: string;
+        taskId: string;
+        content: string;
+        mentions: import("@prisma/client/runtime/client").JsonValue;
     })[]>;
     update(id: string, userId: string, updateCommentDto: UpdateCommentDto): Promise<{
         user: {
@@ -47,22 +47,22 @@ export declare class CommentController {
         };
     } & {
         id: string;
-        content: string;
-        mentions: import("@prisma/client/runtime/client").JsonValue;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        taskId: string;
         userId: string;
+        taskId: string;
+        content: string;
+        mentions: import("@prisma/client/runtime/client").JsonValue;
     }>;
     remove(id: string, userId: string): Promise<{
         id: string;
-        content: string;
-        mentions: import("@prisma/client/runtime/client").JsonValue;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
-        taskId: string;
         userId: string;
+        taskId: string;
+        content: string;
+        mentions: import("@prisma/client/runtime/client").JsonValue;
     }>;
 }

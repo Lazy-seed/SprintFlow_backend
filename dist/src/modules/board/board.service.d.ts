@@ -14,69 +14,65 @@ export declare class BoardService {
             avatarUrl: string | null;
         };
         columns: {
-            id: string;
             name: string;
-            position: number;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            boardId: string;
+            position: number;
             color: string;
             wipLimit: number | null;
-            boardId: string;
         }[];
     } & {
-        id: string;
         name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        workspaceId: string;
+        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        position: number;
-        createdAt: Date;
-        updatedAt: Date;
-        archivedAt: Date | null;
-        workspaceId: string;
         createdBy: string;
+        archivedAt: Date | null;
     }>;
     findAllByWorkspace(workspaceId: string, userId: string): Promise<({
+        _count: {
+            columns: number;
+            tasks: number;
+        };
         creator: {
             id: string;
             fullName: string;
             avatarUrl: string | null;
         };
-        _count: {
-            columns: number;
-            tasks: number;
-        };
     } & {
-        id: string;
         name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        workspaceId: string;
+        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        position: number;
-        createdAt: Date;
-        updatedAt: Date;
-        archivedAt: Date | null;
-        workspaceId: string;
         createdBy: string;
+        archivedAt: Date | null;
     })[]>;
     findOne(id: string, userId: string): Promise<{
         workspace: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
         columns: ({
             tasks: ({
-                _count: {
-                    comments: number;
-                    subtasks: number;
-                };
                 tags: ({
                     tag: {
-                        id: string;
                         name: string;
+                        id: string;
                         createdAt: Date;
                         workspaceId: string;
                         color: string;
@@ -87,6 +83,10 @@ export declare class BoardService {
                     taskId: string;
                     tagId: string;
                 })[];
+                _count: {
+                    comments: number;
+                    subtasks: number;
+                };
                 assignee: {
                     id: string;
                     fullName: string;
@@ -94,12 +94,10 @@ export declare class BoardService {
                 } | null;
             } & {
                 id: string;
-                description: string | null;
-                position: number;
                 createdAt: Date;
                 updatedAt: Date;
+                description: string | null;
                 boardId: string;
-                completedAt: Date | null;
                 columnId: string;
                 title: string;
                 priority: string;
@@ -108,67 +106,69 @@ export declare class BoardService {
                 startDate: Date | null;
                 assigneeId: string | null;
                 reporterId: string;
+                position: number;
                 estimatedHours: number | null;
                 actualHours: number | null;
+                completedAt: Date | null;
             })[];
         } & {
-            id: string;
             name: string;
-            position: number;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            boardId: string;
+            position: number;
             color: string;
             wipLimit: number | null;
-            boardId: string;
         })[];
     } & {
-        id: string;
         name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         description: string | null;
+        workspaceId: string;
+        position: number;
         isPrivate: boolean;
         isTemplate: boolean;
         backgroundColor: string;
-        position: number;
-        createdAt: Date;
-        updatedAt: Date;
-        archivedAt: Date | null;
-        workspaceId: string;
         createdBy: string;
+        archivedAt: Date | null;
     }>;
     remove(id: string, userId: string): Promise<{
         message: string;
     }>;
     createColumn(boardId: string, userId: string, createColumnDto: CreateColumnDto): Promise<{
-        id: string;
         name: string;
-        position: number;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        boardId: string;
+        position: number;
         color: string;
         wipLimit: number | null;
-        boardId: string;
     }>;
     updateColumn(columnId: string, userId: string, updateColumnDto: UpdateColumnDto): Promise<{
-        id: string;
         name: string;
-        position: number;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        boardId: string;
+        position: number;
         color: string;
         wipLimit: number | null;
-        boardId: string;
     }>;
     deleteColumn(columnId: string, userId: string, targetColumnId?: string): Promise<{
         message: string;
     }>;
     reorderColumns(boardId: string, userId: string, reorderColumnsDto: ReorderColumnsDto): Promise<{
-        id: string;
         name: string;
-        position: number;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        boardId: string;
+        position: number;
         color: string;
         wipLimit: number | null;
-        boardId: string;
     }[]>;
 }

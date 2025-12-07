@@ -6,38 +6,38 @@ export declare class SubtaskController {
     constructor(subtaskService: SubtaskService);
     create(taskId: string, userId: string, createSubtaskDto: CreateSubtaskDto): Promise<{
         id: string;
-        title: string;
-        isCompleted: boolean;
-        position: number;
         createdAt: Date;
+        title: string;
+        position: number;
         completedAt: Date | null;
         parentTaskId: string;
+        isCompleted: boolean;
     }>;
     findAll(taskId: string, userId: string): Promise<{
         id: string;
-        title: string;
-        isCompleted: boolean;
-        position: number;
         createdAt: Date;
+        title: string;
+        position: number;
         completedAt: Date | null;
         parentTaskId: string;
+        isCompleted: boolean;
     }[]>;
     update(id: string, userId: string, updateSubtaskDto: UpdateSubtaskDto): Promise<{
         id: string;
-        title: string;
-        isCompleted: boolean;
-        position: number;
         createdAt: Date;
+        title: string;
+        position: number;
         completedAt: Date | null;
         parentTaskId: string;
+        isCompleted: boolean;
     }>;
     remove(id: string, userId: string): Promise<{
         id: string;
-        title: string;
-        isCompleted: boolean;
-        position: number;
         createdAt: Date;
+        title: string;
+        position: number;
         completedAt: Date | null;
         parentTaskId: string;
+        isCompleted: boolean;
     }>;
 }
